@@ -31,38 +31,5 @@ namespace Solver {
         return (a + b) / 2;
     }
 
-    // Find roots recursively by finding critical points
-    inline std::vector<double> findRoots(std::function<double(double)> f, double a, double b) {
-        std::vector<double> roots;
-        
-        // First find roots using direct bisection
-        if (f(a) * f(b) <= 0) {
-            roots.push_back(bisection(f, a, b));
-        }
-        
-        // Then find critical points using derivative
-        auto df = derivative(f);
-        auto ddf = derivative(df);
-        
-        // Find critical points recursively
-        std::vector<double> critPoints = findRoots(df, a, b);
-        
-        // Add endpoints if they're critical
-        if (std::abs(df(a)) < EPS) critPoints.push_back(a);
-        if (std::abs(df(b)) < EPS) critPoints.push_back(b);
-        
-        // For each pair of critical points, check for roots
-        for (size_t i = 0; i < critPoints.size(); i++) {
-            for (size_t j = i + 1; j < critPoints.size(); j++) {
-                double left = critPoints[i];
-                double right = critPoints[j];
-                
-                if (f(left) * f(right) <= 0) {
-                    roots.push_back(bisection(f, left, right));
-                }
-            }
-        }
-        
-        return roots;
-    }
+    
 }
