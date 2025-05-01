@@ -10,6 +10,29 @@
 
 namespace Ntheory
 {
+    // Get nth digit from right (0-based index)
+    inline int getNthDigit(long long num, int n) {
+        num = std::abs(num);
+        while (n > 0) {
+            num /= 10;
+            n--;
+        }
+        return num % 10;
+    }
+
+    // Reverse a number
+    inline long long reverseNumber(long long num) {
+        long long reversed = 0;
+        bool negative = num < 0;
+        num = std::abs(num);
+        
+        while (num > 0) {
+            reversed = reversed * 10 + num % 10;
+            num /= 10;
+        }
+        
+        return negative ? -reversed : reversed;
+    }
 
     inline int gcd(int a, int b) {
         while (b) { int t = b; b = a % b; a = t; }
