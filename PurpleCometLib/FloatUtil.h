@@ -18,3 +18,9 @@ inline const T& clamp(const T& value, const T& low, const T& high) {
 inline T lerp(T a, T b, double t) {
     return a + (b - a) * t;
 }
+inline float abs(float x) {
+    return x < 0 ? -x : x;
+}
+inline float log(float base,float x){
+    return log(x)/log(base);
+}

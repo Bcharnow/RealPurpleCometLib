@@ -71,5 +71,20 @@ namespace geometry {
             std::cout << "Line: (" << start.x << ", " << start.y << ") to ("
                 << end.x << ", " << end.y << ")\n";
         }
+            v2::Vector2 project(const v2::Vector2& point) const {
+                v2::Vector2 dir = end - start;
+                v2::Vector2 toPt = point - start;
+                float t = v2::dot(toPt, dir) / v2::dot(dir, dir);
+                return start + dir * t;
+            }
+            // Returns perpendicular distance from point to infinite line
+            float distanceToPoint(const v2::Vector2& point) const {
+                v2::Vector2 proj = project(point);
+                return v2::dist(point, proj);
+            }
+        };
+    }
+
+
     };
 }

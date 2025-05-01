@@ -1,6 +1,6 @@
 
 #pragma once
-#i
+#include "dynamicarray.h"
 #include <functional>
 #include <cmath>
 
@@ -63,19 +63,19 @@ namespace Solver {
     }
 
     // Find roots using hybrid approach (Newton + Bisection)
-    inline std::vector<double> findAllRoots(std::function<double(double)> f, double a, double b, int samples = 50) {
-        std::vector<double> roots;
+    inline dynamicarray::array<double> findAllRoots(std::function<float(float)> f, double a, double b, int samples = 50) {
+        std::vector<float> roots;
         auto df = derivative(f);
         double step = (b - a) / samples;
         
         // Sample points and use Newton's method
         for (int i = 0; i <= samples; i++) {
-            double x0 = a + i * step;
-            double fx0 = f(x0);
+            float x0 = a + i * step;
+            float fx0 = f(x0);
             
             // If we're already close to a root
             if (std::abs(fx0) < EPS) {
-                roots.push_back(x0);
+                roots.append(x0);
                 continue;
             }
             
@@ -91,10 +91,55 @@ namespace Solver {
                         break;
                     }
                 }
-                if (isNew) roots.push_back(root);
+                if (isNew) roots.append(root);
             }
         }
         
         return roots;
     }
+   
+        using Complex = std::complex<double>;
+
+        // Solves polynomial using Durand-Kerner method
+        std::vector<Complex> solveComplexPolynomial(const std::vector<Complex>& coeffs, double tol = 1e-10, int maxIter = 1000) {
+            int degree = coeffs.size() - 1;
+            if (degree < 1) throw std::invalid_argument("Polynomial degree must be at least 1");
+
+            // Initial guesses: roots of unity scaled
+            std::vector<Complex> roots(degree);
+            const double PI = 3.141592653589793;
+            for (int i = 0; i < degree; ++i) {
+                double angle = 2 * PI * i / degree;
+                roots[i] = Complex(std::cos(angle), std::sin(angle));
+            }
+
+            for (int iter = 0; iter < maxIter; ++iter) {
+                bool converged = true;
+
+                for (int i = 0; i < degree; ++i) {
+                    Complex prod = Complex(1.0, 0.0);
+                    for (int j = 0; j < degree; ++j) {
+                        if (i != j) prod *= (roots[i] - roots[j]);
+                    }
+
+                    // Evaluate polynomial at root[i]
+                    Complex fx = coeffs[0];
+                    for (int k = 1; k <= degree; ++k) {
+                        fx = fx * roots[i] + coeffs[k];
+                    }
+
+                    Complex delta = fx / prod;
+                    roots[i] -= delta;
+
+                    if (std::abs(delta) > tol) converged = false;
+                }
+
+                if (converged) break;
+            }
+
+            return roots;
+        }
+
+    }
+
 }
