@@ -1,0 +1,527 @@
+#include <iomanip>
+#include <stdexcept>
+#include <iostream>
+#include <new>
+#include <cstdlib>
+#include <cstring>
+#pragma once
+
+namespace dynamicarray {
+
+
+	// Resizing function that doubles the size of the array when needed.
+	// If the length is 0, it initializes to a default size of 2.
+	inline int resizelength(int length) {
+		return (length == 0) ? 2 : 2 * length;  // Double the capacity for efficient reallocation
+	}
+
+	template<class T, bool initelems = true>
+	class array {
+	public:
+		// Debugging function to print the contents of the list (useful for debugging).
+		void debuglist();
+
+
+		bool empty();
+		// Standard operator[] that returns a reference to the element at the given index.
+		T& operator[](int index);
+
+		// At function that checks if the index is in range before returning the element.
+		T& at(int index) const;
+
+		// Unsafe method to directly access an element at the specified index.
+		T& UncheckedAt(const int index);
+
+		// Cut a range of elements from startindex to endindex.
+		void cutind(int startindex, int endindex);
+
+		// Slice the array between a start and end index.
+		void slice(int startindex, int endindex);
+
+		// Insert an element at a specific index, shifting others.
+		void insertind(int index, T value);
+
+		// Delete an element at the given index, shifting others.
+		void deleteind(int index);
+
+
+
+
+		// Append a single value to the array.
+		void append(const T& value);
+
+		// Append an array of elements to the current array.
+		void append(T* arr, int otherlen);
+
+		// Append another array to this one.
+		void append(array arr);
+
+
+
+
+		// Destroy the array by deallocating memory and resetting values.
+		void destroy();
+
+
+		// Swap contents of two arrays efficiently.
+		void swap(array& other);
+
+		// Default constructor.
+		array();
+
+		// Constructor that initializes the array with a given size.
+		array(int size);
+
+		// Constructor that initializes the array from a raw pointer and size.
+		array(T* arr, int size);
+
+		// Move constructor.
+		array(array&& other) noexcept;
+
+		// Copy constructor.
+		explicit array(const array& arr);
+		 array(const std::initializer_list<T>& arr);
+		// Move assignment operator.
+		array& operator=(array&& other) noexcept;
+		array& operator=(const array& other);
+
+		// Pointer to the dynamically allocated array.
+		T* list;
+		// Current number of elements in the array.
+		unsigned int length;
+
+		// Total allocated capacity of the array.
+		unsigned int capacity;
+
+		// Iterator class for accessing elements using range-based for loops.
+		class Iterator {
+		private:
+			T* ptr;  // Pointer to the current element in the array.
+
+		public:
+			using value_type = T;
+			using iterator = Iterator;
+			using const_iterator = const T*;
+			using size_type = std::size_t;
+			using difference_type = std::ptrdiff_t;
+			using pointer = T*;
+			using reference = T&;
+			using iterator_category = std::random_access_iterator_tag;
+			// Constructor initializes the iterator with a pointer.
+			Iterator(T* p) : ptr(p) {}
+
+			Iterator begin() {
+				return Iterator(list);  // Return an iterator to the first element.
+			}
+
+			Iterator end() {
+				return Iterator(list + length);  // Return an iterator past the last element.
+			}
+
+			// Method to return the current capacity of the array.
+			size_t get_size() const {
+				return capacity;
+			}
+
+			// A method that checks if a value is undefined (default-constructed).
+			bool is_undefined(const T& value) const {
+				return value == T();  // Assuming that the default constructor of T indicates an undefined value.
+			}
+			reference operator*() const { return *ptr; }
+			pointer operator->() const { return ptr; }
+
+			Iterator& operator++() { ++ptr; return *this; }
+			Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+			Iterator& operator--() { --ptr; return *this; }
+			Iterator operator--(int) { Iterator tmp = *this; --(*this); return tmp; }
+
+			Iterator operator+(difference_type n) const { return Iterator(ptr + n); }
+			Iterator operator-(difference_type n) const { return Iterator(ptr - n); }
+			difference_type operator-(const Iterator& other) const { return ptr - other.ptr; }
+
+			bool operator==(const Iterator& other) const { return ptr == other.ptr; }
+			bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
+			bool operator<(const Iterator& other) const { return ptr < other.ptr; }
+			bool operator>(const Iterator& other) const { return ptr > other.ptr; }
+			bool operator<=(const Iterator& other) const { return ptr <= other.ptr; }
+			bool operator>=(const Iterator& other) const { return ptr >= other.ptr; }
+
+
+		};
+
+		// Methods to get the beginning and end iterators for range-based for loops.
+		Iterator begin() {
+			return Iterator(list);  // Return an iterator to the first element.
+		}
+
+		Iterator end() {
+			return Iterator(list + length);  // Return an iterator past the last element.
+		}
+
+		// Method to return the current capacity of the array.
+		size_t get_size() const {
+			return capacity;
+		}
+
+		// A method that checks if a value is undefined (default-constructed).
+		bool is_undefined(const T& value) const {
+			return value == T();  // Assuming that the default constructor of T indicates an undefined value.
+		}
+
+	private:
+		// Resize the array to a specific size (or double the size if not specified).
+		void resize(int size = 0);
+	};
+
+
+
+
+	template<class T, bool initelems>
+	inline void array<T, initelems >::debuglist()
+	{
+		for (int i = 0; i < length; i++)
+		{
+			debug(list[i]);
+		}
+	}
+
+	//deletes content of list(not pointers!!)
+
+	template<class T, bool initelems>
+	inline bool array<T, initelems>::empty()
+	{
+		return (length == 0);
+	}
+
+	//returns alias to index
+	template<class T, bool initelems >
+	T& array<T, initelems>::operator[](int index) {
+
+		if (index >= capacity)
+		{
+			resize(resizelength(index));//array resize failed
+
+		}
+		if (index >= length) {//max index is length
+			//i do not make it an error because this funciton is supposed to go out of bonds
+			length = index + 1;
+
+		}
+		if (index < 0)
+		{
+			throw std::invalid_argument("Index out of bounds for []");
+		}
+
+
+
+		return list[index];
+
+
+	}
+	//same as [] but only in bounds
+	template<class T, bool initelems >
+	T& array<T, initelems>::at(int index) const {
+		if (index >= length || index < 0) {
+			throw std::invalid_argument("Index out of bounds for insertion");
+		}
+
+		return list[index];
+
+
+	}
+	//unsafe
+	template<class T, bool initelems>
+	inline T& array<T, initelems>::UncheckedAt(const int ind)
+	{
+
+		return list[ind];
+	}
+
+	//keeps a range of indices including [start,end] ind,todo add inclusive exculsive toggle
+	template<class T, bool initelems>
+	void array<T, initelems>::slice(int startindex, int endindex) {
+
+
+		if (endindex < startindex || startindex < 0 || endindex >= length)
+		{
+
+			throw	std::invalid_argument("Index out of bounds for slice");
+		}
+		//moves indices 
+		for (int i = startindex; i <= endindex; i++)
+		{
+			list[i - startindex] = list[i];
+		}
+
+		// setting length to area remaining
+		length = endindex - startindex + 1;
+
+		return;
+
+	}
+	//removes a range of indexes [start,end]
+	template<class T, bool initelems>
+	void array<T, initelems>::cutind(int startindex, int endindex) {
+
+		if (endindex < startindex || startindex < 0 || endindex >= length)
+		{
+			throw	std::invalid_argument("Index out of bounds for cutting");
+		}
+
+		int dif = endindex - startindex;
+
+		for (int i = endindex + 1; i < length; i++)
+		{
+			list[i - dif - 1] = list[i];
+		}
+
+
+		length -= dif + 1;
+
+	}
+
+	//deleted the element at index
+	template<class T, bool initelems>
+	void array<T, initelems>::deleteind(int index) {
+
+		if (index < 0 || index >= length)
+		{
+			throw std::invalid_argument("Index out of bounds for deletion");
+		}
+
+
+
+		length--;//decrements size
+		for (int i = index; i < length; i++)
+		{
+
+			list[i] = list[i + 1];//this lets index be removed
+		}
+
+
+	}
+
+
+
+
+
+
+
+
+	template<class T, bool initelems>
+	void array<T, initelems>::insertind(int index, T value) {
+		if (index < 0 || index>length)
+		{
+			throw std::invalid_argument("Index out of bounds for insertion");
+
+		}
+		if (length >= capacity)
+		{
+			resize(resizelength(length));
+		}
+
+
+
+		for (int i = length; i > index; i--)
+		{
+			list[i] = list[i - 1];
+		}
+
+		list[index] = value;
+
+		length++;
+	}
+
+	//copies and appends an element to the list(!!!issues with pointers!!!)
+	template<class T, bool initelems>
+	void array<T, initelems>::append(const T& value) {
+		if (length >= capacity)
+		{
+			resize(resizelength(length));
+		}
+		list[length] = T(value);
+		length++;
+
+	}
+	//append
+	template<class T, bool initelems >
+	inline void array<T, initelems>::append(T* arr, int otherlen)
+	{
+
+		if (length + otherlen >= capacity)
+		{
+			resize(resizelength((length + otherlen)));
+		}
+
+
+		for (int i = 0; i < otherlen; i++)
+		{
+			list[i + length] = arr[i];
+		}
+		length += otherlen;
+	}
+	//resizes the array
+	//appends a list to the end of the list(doesent delete it)(!!!caution with pointer lists!!!)
+	template<class T, bool initelems >
+	void array<T, initelems>::append(array arr) {
+
+		append(arr.list, arr.length);
+	}
+
+
+	template<class T, bool initelems>
+	void array<T, initelems >::resize(int size) {
+		//returns if success
+
+
+		if (size == 0)
+		{
+			size = resizelength(length);//default case
+		}
+
+		if (size > capacity)//so it cant be shrunk
+		{
+
+			void* newlist;
+			if (capacity != 0)
+			{
+				//reealloc because it is faster.
+				newlist = realloc((void*)list, sizeof(T) * size);
+			}
+			else
+			{
+
+				newlist = malloc(sizeof(T) * size);
+			}
+
+			list = ((T*)newlist);
+			//somtimes dont want to init elems so i make it an option to turn it off
+			if (initelems)
+			{
+				for (int i = capacity; i < size; i++) {
+
+					new (list + i)T();
+				}
+			}
+
+			//
+
+
+			capacity = size;
+
+		}
+
+	}
+
+	template<class T, bool initelems>
+	void array<T, initelems >::destroy() {
+		if (list != nullptr) {
+			delete[] list;
+			list = nullptr;
+		}
+		length = 0;
+		capacity = 0;
+	}
+
+	template<class T, bool initelems >
+	void array<T, initelems>::swap(array<T, initelems>& other)
+	{
+		std::swap(length, other.length);
+		std::swap(capacity, other.capacity);
+		std::swap(list, other.list);
+	}
+	template<class T, bool initelems >
+	array<T, initelems>::array(int size) {
+
+
+		length = 0;
+		capacity = 0;
+		if (0 < size)
+		{
+			resize(size);
+		}
+		else
+		{
+			list = nullptr;
+		}
+
+	}
+
+
+
+
+	template<class T, bool initelems >
+	array<T, initelems>::array() {
+		length = 0;
+		capacity = 0;
+		list = nullptr;
+	}
+
+	template<class T, bool initelems >
+	inline array<T, initelems>::array(T* arr, int size)
+	{
+		length = size;
+		capacity = size;
+		list = new T[size];
+		if constexpr (std::is_trivially_copyable_v<T>) {
+			std::memcpy(list, arr, sizeof(T) * size);  // Fast copy for trivially copyable types
+		}
+		else {
+			for (int i = 0; i < size; i++) {
+				list[i] = arr[i];
+			}
+		}
+
+	}
+	//just 
+	template<class T, bool initelems>
+	array<T, initelems>::array(const array& arr) : array(arr.list, arr.length) {
+
+	}
+		template<class T, bool initelems>
+		inline array<T, initelems>::array(const std::initializer_list<T>&arr) {
+			length = arr.size();
+			capacity = length;
+			list = new T[length];
+			std::copy(arr.begin(), arr.end(), list);
+		}
+		
+	
+	//takes an r value renrennce,
+	template<class T, bool initelems>
+	inline array<T, initelems>::array(array&& other) noexcept
+	{
+		length = other.length;
+		capacity = other.capacity;
+		list = other.list;
+		other.list = nullptr;  // Reset the source vector
+		other.length = 0;
+		other.capacity = 0;
+
+	}
+	//takes an r value refrence  
+	template<class T, bool initelems>
+	array<T, initelems>& array<T, initelems>::operator=(array<T, initelems>&& other) noexcept {
+		// Prevent self-assignment
+		if (this != &other) {
+			destroy();
+			swap(other);
+		}
+		return *this;
+	}
+
+	template<class T, bool initelems>
+	array<T, initelems>& array<T, initelems>::operator=(const array<T, initelems>& other)
+	{
+		if (this != &other) {
+			destroy();
+			array temp(other);
+			swap(temp);
+		}
+		return *this;
+	}
+
+
+
+}
