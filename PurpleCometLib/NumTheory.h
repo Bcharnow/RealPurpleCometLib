@@ -34,4 +34,5 @@ namespace Ntheory
 
         return result;
     }
+
 }

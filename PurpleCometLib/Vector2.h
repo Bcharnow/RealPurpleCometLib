@@ -1,7 +1,7 @@
 #include <cmath>
 #include <Windows.h>
 #include "FloatUtil.h"
-
+#include <complex>
 #pragma once
 namespace v2 {
 	struct Vector2;
@@ -137,7 +137,10 @@ namespace v2 {
 
 	struct Vector2
 	{
-
+	Vector2(complex<float> point){
+		x=point.real();
+		y=point.imag();
+	}
 		Vector2(float X, float Y);
 		Vector2();
 		void operator=(const Vector2& p1);

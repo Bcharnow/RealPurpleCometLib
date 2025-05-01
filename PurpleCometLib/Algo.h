@@ -67,5 +67,19 @@ namespace Algo {
 			}
 			return false;  // Return false if no element satisfies the property
 		}
-	
+double Prod(std::function<float(float)> func, int start, int end){
+double result = 1.0;
+	for (int i = start; i <= end; i++) {
+		result *= func(i);
+	}
+	return result;
+	}
+
+	double Sum(std::function<float(float)> func, int start, int end){
+	double result =0.0;
+		for (int i = start; i <= end; i++) {
+			result += func(i);
+		}
+		return result;
+		} 
 };
