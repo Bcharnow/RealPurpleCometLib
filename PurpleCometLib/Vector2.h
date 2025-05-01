@@ -362,4 +362,19 @@ namespace v2 {
 		float angleInDegrees = toDegrees(a);
 		return (angleInDegrees < 0) ? (angleInDegrees + 360.0f) : angleInDegrees;
 	}
+	inline double angle_between(const Vector2& a, const Vector2& b) {
+		double dot = a.x * b.x + a.y * b.y;
+		double magA = std::hypot(a.x, a.y);
+		double magB = std::hypot(b.x, b.y);
+
+		if (magA == 0 || magB == 0) {
+			throw std::invalid_argument("Cannot compute angle with zero-length vector.");
+		}
+
+		double cosTheta = dot / (magA * magB);
+		// Clamp to avoid domain errors due to floating-point inaccuracies
+		cosTheta = clamp(cosTheta, -1.0, 1.0);
+
+		return std::acos(cosTheta);  // returns angle in radians
+	}
 }

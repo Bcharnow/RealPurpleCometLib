@@ -14,7 +14,7 @@ namespace Algo {
 
 	template <typename T>
 	T remove_duplicates(const T& container) {
-		Container result = container;
+		T result = container;
 		auto last = std::unique(result.begin(), result.end());
 		result.erase(last, result.end());
 		return result;
@@ -57,5 +57,15 @@ namespace Algo {
 	}
 	throw std::runtime_error("Condition not met within max attempts.");
 	}
-
+	
+		template<typename Container, typename T>
+		bool anySatisfies(const Container& container, std::function<bool(T)> property) {
+			for (const auto& element : container) {
+				if (property(element)) {
+					return true;  // Return true if any element satisfies the property
+				}
+			}
+			return false;  // Return false if no element satisfies the property
+		}
+	
 };

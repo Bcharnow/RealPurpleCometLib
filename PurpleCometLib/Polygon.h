@@ -14,7 +14,10 @@ namespace Polygon {
         Polygon() = default;
         Polygon(std::initializer_list<v2::Vector2> pts) : pointlist(pts) {}
         Polygon(const dynamicarray::array<v2::Vector2>& pts) : pointlist(pts) {}
+        void destroy() {
 
+            pointlist.destroy();
+        }
         // allow indexing
         v2::Vector2& operator[](int i) {
             return pointlist.at(i);   // throws if out‐of‐bounds

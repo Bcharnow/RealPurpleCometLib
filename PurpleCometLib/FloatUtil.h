@@ -9,6 +9,12 @@ inline float toRadians(float degrees) {
 inline float toDegrees(float rad) {
     return rad/DEG2RAD;
 }
-bool apxequal(float x1, float x2) {
+inline bool apxequal(float x1, float x2) {
     return std::fabs( x1 - x2)<.00001f;
+}template <typename T>
+inline const T& clamp(const T& value, const T& low, const T& high) {
+    return (value < low) ? low : (value > high) ? high : value;
+}   template<typename T>
+inline T lerp(T a, T b, double t) {
+    return a + (b - a) * t;
 }

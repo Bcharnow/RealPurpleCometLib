@@ -60,10 +60,10 @@ namespace geometry {
             float intersectY = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
 
             // Check if the intersection point lies within the bounds of both line segments
-            return (std::min(x1, x2) <= intersectX && intersectX <= std::max(x1, x2) &&
-                std::min(y1, y2) <= intersectY && intersectY <= std::max(y1, y2) &&
-                std::min(x3, x4) <= intersectX && intersectX <= std::max(x3, x4) &&
-                std::min(y3, y4) <= intersectY && intersectY <= std::max(y3, y4));
+            return (min(x1, x2) <= intersectX && intersectX <= max(x1, x2) &&
+                min(y1, y2) <= intersectY && intersectY <= max(y1, y2) &&
+                min(x3, x4) <= intersectX && intersectX <= max(x3, x4) &&
+                min(y3, y4) <= intersectY && intersectY <= max(y3, y4));
         }
 
         // Print the line (for debugging or visualization)

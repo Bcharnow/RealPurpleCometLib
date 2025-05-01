@@ -143,6 +143,7 @@
     <ClInclude Include="Queue.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Rational.h" />
+    <ClInclude Include="Solver.h" />
     <ClInclude Include="Spirals.h" />
     <ClInclude Include="Stack.h" />
     <ClInclude Include="Vector2.h" />

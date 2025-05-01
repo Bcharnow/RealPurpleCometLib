@@ -19,10 +19,7 @@ namespace Ntheory
         return a / gcd(a, b) * b;
     }
 
-    template<typename T>
-    inline T lerp(T a, T b, double t) {
-        return a + (b - a) * t;
-    }
+ 
    long long mod_pow(long long base, long long exp, long long mod) {
         long long result = 1;
         base = base % mod;  // In case base is larger than mod

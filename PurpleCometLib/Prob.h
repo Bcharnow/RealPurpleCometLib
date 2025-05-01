@@ -16,7 +16,7 @@ namespace Prob {
                 }
             }
         }
-        void PrintRatio() { Ratio::Ratio(float(passes) / trials, 100).Print(); }
+        void PrintRatio(int Tests) { Ratio::Ratio(float(passes) / trials, Tests).Print(); }
 
     };
 }
